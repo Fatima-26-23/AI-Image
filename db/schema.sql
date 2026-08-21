@@ -52,6 +52,21 @@ CREATE TABLE IF NOT EXISTS suggestions (
 CREATE INDEX IF NOT EXISTS idx_suggestions_post_id ON suggestions (post_id);
 CREATE INDEX IF NOT EXISTS idx_suggestions_status ON suggestions (status);
 
+CREATE TABLE IF NOT EXISTS jobs (
+    id               SERIAL PRIMARY KEY,
+    job_type         TEXT NOT NULL CHECK (job_type IN ('ingestion')),
+    status           TEXT NOT NULL DEFAULT 'pending'
+                       CHECK (status IN ('pending', 'running', 'completed', 'failed')),
+    total_items      INTEGER NOT NULL DEFAULT 0,
+    processed_items  INTEGER NOT NULL DEFAULT 0,
+    failed_items     INTEGER NOT NULL DEFAULT 0,
+    error_log        TEXT[] DEFAULT '{}',
+    started_at       TIMESTAMPTZ,
+    finished_at      TIMESTAMPTZ,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs (status);
+
 CREATE TABLE IF NOT EXISTS cost_log (
     id           SERIAL PRIMARY KEY,
     call_type    TEXT NOT NULL CHECK (call_type IN ('vision', 'embedding')),
