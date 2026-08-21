@@ -1,0 +1,41 @@
+run: "python -m uvicorn app.main:app --reload"
+seed: "curl -X POST http://127.0.0.1:8000/images/ingest"
+test: "python -m pytest tests/ -v"
+base_url: "http://127.0.0.1:8000"
+
+endpoints:
+  - method: POST
+    path: /images/ingest
+    purpose: "Enqueue vision tagging + embedding batch job over the image corpus"
+  - method: GET
+    path: /jobs/{job_id}
+    purpose: "Poll batch job progress, retries, failures"
+  - method: POST
+    path: /posts
+    purpose: "Create a post (embeds content immediately)"
+  - method: GET
+    path: /posts/{post_id}/images
+    purpose: "Ranked image suggestions for a post, guard already applied"
+  - method: GET
+    path: /posts/{post_id}/suggestions
+    purpose: "Full suggestion history/review trail for a post"
+  - method: GET
+    path: /suggestions/{suggestion_id}
+    purpose: "Inspect why a specific suggestion was accepted/rejected"
+  - method: POST
+    path: /suggestions/{suggestion_id}/approve
+    purpose: "Human approves a suggestion (review workflow)"
+  - method: POST
+    path: /suggestions/{suggestion_id}/reject
+    purpose: "Human rejects a suggestion (review workflow)"
+  - method: GET
+    path: /costs
+    purpose: "Per-call cost log (vision + embedding)"
+  - method: GET
+    path: /health
+    purpose: "Liveness check"
+
+eval:
+  command: "python -m eval.run_eval"
+  dataset: "eval/eval_set.json"
+  reports: "top-1 precision, printed to stdout"

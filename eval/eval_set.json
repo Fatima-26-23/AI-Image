@@ -1,0 +1,45 @@
+[
+  {
+    "title": "The secret life of red foxes",
+    "content": "Red foxes are highly adaptable animals found across forests, grasslands, and even cities. They hunt small mammals at dusk and dawn, using their keen hearing to locate prey under snow.",
+    "expected_subject_contains": "fox"
+  },
+  {
+    "title": "Gray wolves and pack hunting",
+    "content": "Gray wolves live and hunt in coordinated packs, using complex vocal and body-language signals to bring down large prey like elk and moose.",
+    "expected_subject_contains": "wolf"
+  },
+  {
+    "title": "Why dogs became man's best friend",
+    "content": "Domestic dogs descended from wolves tens of thousands of years ago and have since become loyal companions, working animals, and family pets around the world.",
+    "expected_subject_contains": "dog"
+  },
+  {
+    "title": "Black bears in North American forests",
+    "content": "Black bears are opportunistic omnivores, foraging for berries, insects, and fish while preparing for winter hibernation.",
+    "expected_subject_contains": "bear"
+  },
+  {
+    "title": "The grace of white-tailed deer",
+    "content": "White-tailed deer are common across North America, recognizable by the flash of their tail as they flee from predators through the underbrush.",
+    "expected_subject_contains": "deer"
+  },
+  {
+    "title": "Vulpes vulpes: the most widespread canid",
+    "content": "Vulpes vulpes, known commonly as the red fox, has the widest geographic range of any member of the order Carnivora, spanning most of the Northern Hemisphere.",
+    "expected_subject_contains": "fox",
+    "note": "Tests semantic matching on the scientific name, not just the common name -- brief's explicit 'red fox / Vulpes vulpes' example."
+  },
+  {
+    "title": "Foxes vs wolves: telling them apart",
+    "content": "Though both are wild canines, red foxes are much smaller than gray wolves, with a bushier tail and more pointed features suited to solitary hunting rather than pack life.",
+    "expected_subject_contains": "fox",
+    "note": "Near-miss stress test -- both fox and wolf terms appear, expects the guard/ranking to still surface fox first."
+  },
+  {
+    "title": "Quarterly earnings report for a software company",
+    "content": "Revenue grew 12% year over year, driven by strong enterprise subscription renewals and a new pricing tier launched in Q2.",
+    "expected_subject_contains": null,
+    "note": "No suitable image should exist in the corpus for this -- expects 'no confident match', tests Probe 4."
+  }
+]

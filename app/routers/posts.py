@@ -21,7 +21,7 @@ def create_post(payload: PostCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/posts/{post_id}/images")
-def get_post_images(post_id: int, db: Session = Depends(get_db)):
+def get_post_images(post_id: int, top_n: int = 5, db: Session = Depends(get_db)):
     post = db.get(Post, post_id)
     if post is None:
         raise HTTPException(status_code=404, detail="post not found")
@@ -30,4 +30,4 @@ def get_post_images(post_id: int, db: Session = Depends(get_db)):
     if vector_row is None:
         raise HTTPException(status_code=422, detail="post has no embedding yet")
 
-    return get_ranked_suggestions(db, post, vector_row.embedding)
+    return get_ranked_suggestions(db, post, vector_row.embedding, top_n=top_n)
