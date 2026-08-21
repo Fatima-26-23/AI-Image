@@ -39,6 +39,57 @@ class Job(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class ImageVector(Base):
+    __tablename__ = "image_vectors"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    image_id: Mapped[int] = mapped_column(Integer, ForeignKey("images.id", ondelete="CASCADE"), nullable=False, unique=True)
+    embedding: Mapped[list[float]] = mapped_column(ARRAY(Float), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    image: Mapped["Image"] = relationship()
+
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PostVector(Base):
+    __tablename__ = "post_vectors"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    post_id: Mapped[int] = mapped_column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False, unique=True)
+    embedding: Mapped[list[float]] = mapped_column(ARRAY(Float), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    post: Mapped["Post"] = relationship()
+
+
+class Suggestion(Base):
+    __tablename__ = "suggestions"
+    __table_args__ = (
+        CheckConstraint("guard_decision IN ('accepted','rejected')", name="suggestions_guard_decision_check"),
+        CheckConstraint("status IN ('pending','approved','rejected')", name="suggestions_status_check"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    post_id: Mapped[int] = mapped_column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    image_id: Mapped[int] = mapped_column(Integer, ForeignKey("images.id", ondelete="CASCADE"), nullable=False)
+    similarity_score: Mapped[float | None] = mapped_column(Float)
+    guard_decision: Mapped[str] = mapped_column(Text, nullable=False)
+    guard_reason: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text, default="pending", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    post: Mapped["Post"] = relationship()
+    image: Mapped["Image"] = relationship()
+
+
 class CostLog(Base):
     __tablename__ = "cost_log"
     __table_args__ = (

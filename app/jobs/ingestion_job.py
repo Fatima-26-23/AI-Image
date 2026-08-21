@@ -19,9 +19,10 @@ from pathlib import Path
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
+from app.ai.embedding_client import get_embedding_client
 from app.ai.vision_client import VisionClient, get_vision_client
 from app.config import settings
-from app.models import Image, Job
+from app.models import Image, ImageVector, Job
 from app.schemas.image_tags import ImageTags
 from app.services.cost_tracker import log_cost
 
@@ -65,6 +66,7 @@ def run_ingestion_job(db: Session, job_id: int, corpus_dir: str | None = None) -
     db.commit()
 
     client = get_vision_client()
+    embedder = get_embedding_client()
 
     for path in image_paths:
         # Create the row up front so a mid-run poll can see "not tagged yet"
@@ -93,6 +95,20 @@ def run_ingestion_job(db: Session, job_id: int, corpus_dir: str | None = None) -
         image_row.confidence = tags.confidence
         image_row.flagged = tags.is_low_confidence
         db.commit()
+
+        # Embed the caption so this image can be ranked against posts.
+        # A flagged (low-confidence) image is still embedded -- the guard,
+        # not the embedding step, is what keeps it out of suggestions.
+        try:
+            embedding = embedder.embed_text(tags.caption)
+            db.add(ImageVector(image_id=image_row.id, embedding=embedding))
+            log_cost(db, call_type="embedding", reference_id=image_row.id, cost_usd=0.0)
+            db.commit()
+        except Exception as exc:  # noqa: BLE001 -- embedding failure shouldn't kill the batch
+            job.error_log = job.error_log + [f"{path.name}: embedding failed: {exc}"]
+            db.commit()
+            # Image row + tags are kept; it just won't appear in ranking
+            # until an embedding exists, which is the safe default.
 
         job.processed_items += 1
         db.commit()
